@@ -128,3 +128,11 @@ let rec rotate lst n =
   match lst with
   | [] -> []
   | h :: t -> if n = 0 then lst else rotate (t @ [ h ]) (n - 1)
+
+let rec remove_at n = function
+  | [] -> failwith "index out of bounds"
+  | h :: t -> if n = 0 then t else h :: remove_at (n - 1) t
+
+let rec insert_at v n = function
+  | [] -> failwith "index out of bounds"
+  | h :: t as l -> if n = 0 then v :: l else h :: insert_at v (n - 1) t
