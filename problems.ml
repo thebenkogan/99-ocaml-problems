@@ -62,3 +62,31 @@ let pack lst =
       end
   in
   pack_aux [] lst
+
+let encode lst =
+  List.map
+    (function
+      | h :: _ as l -> (length l, h)
+      | [] -> failwith "pack returned empty sublist")
+    (pack lst)
+
+type 'a rle =
+  | One of 'a
+  | Many of int * 'a
+
+let modified_encode lst =
+  List.map
+    (fun (count, v) -> if count = 1 then One v else Many (count, v))
+    (encode lst)
+
+let rec decode lst =
+  let rec add_many v n =
+    if n = 0 then [] else v :: add_many v (n - 1)
+  in
+  match lst with
+  | [] -> []
+  | h :: t -> begin
+      match h with
+      | Many (count, v) -> add_many v count @ decode t
+      | One v -> v :: decode t
+    end
