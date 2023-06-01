@@ -106,3 +106,25 @@ let drop lst n =
         if pos = 1 then drop_aux n t else h :: drop_aux (pos - 1) t
   in
   drop_aux n lst
+
+let split lst n =
+  let rec split_aux acc n = function
+    | [] -> (List.rev acc, [])
+    | h :: t as l ->
+        if n = 0 then (List.rev acc, l)
+        else split_aux (h :: acc) (n - 1) t
+  in
+  split_aux [] n lst
+
+let rec slice lst low high =
+  match lst with
+  | [] -> []
+  | h :: t ->
+      if low <> 0 then slice t (low - 1) (high - 1)
+      else if high >= 0 then h :: slice t low (high - 1)
+      else []
+
+let rec rotate lst n =
+  match lst with
+  | [] -> []
+  | h :: t -> if n = 0 then lst else rotate (t @ [ h ]) (n - 1)
