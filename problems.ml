@@ -79,14 +79,30 @@ let modified_encode lst =
     (fun (count, v) -> if count = 1 then One v else Many (count, v))
     (encode lst)
 
-let rec decode lst =
-  let rec add_many v n =
-    if n = 0 then [] else v :: add_many v (n - 1)
-  in
-  match lst with
+let rec create_many v n =
+  if n = 0 then [] else v :: create_many v (n - 1)
+
+let rec decode = function
   | [] -> []
   | h :: t -> begin
       match h with
-      | Many (count, v) -> add_many v count @ decode t
+      | Many (count, v) -> create_many v count @ decode t
       | One v -> v :: decode t
     end
+
+let rec duplicate = function
+  | [] -> []
+  | h :: t -> h :: h :: duplicate t
+
+let rec replicate lst n =
+  match lst with
+  | [] -> []
+  | h :: t -> create_many h n @ replicate t n
+
+let drop lst n =
+  let rec drop_aux pos = function
+    | [] -> []
+    | h :: t ->
+        if pos = 1 then drop_aux n t else h :: drop_aux (pos - 1) t
+  in
+  drop_aux n lst
