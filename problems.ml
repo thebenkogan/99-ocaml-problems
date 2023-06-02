@@ -168,3 +168,41 @@ let permutation lst =
           (List.nth lst rand_idx :: acc)
   in
   permuatation_aux len IntSet.empty []
+
+let rec extract n lst =
+  if n = 1 then List.map (fun x -> [ x ]) lst
+  else
+    let rec extract_aux acc = function
+      | [] -> acc
+      | h :: t ->
+          let sets =
+            List.map (fun set -> h :: set) (extract (n - 1) t)
+          in
+          extract_aux (sets @ acc) t
+    in
+    extract_aux [] lst
+
+let group lst sizes =
+  let subset_groups = List.map (fun size -> extract size lst) sizes in
+  let is_disjoint (lst1 : 'a list) (lst2 : 'a list) =
+    let rec contains_elt lst v = List.exists (fun x -> x = v) lst in
+    List.for_all (fun x -> not (contains_elt lst2 x)) lst1
+  in
+  let is_lst_disjoint_from_sets (lst : 'a list) (sets : 'a list list) =
+    List.for_all (is_disjoint lst) sets
+  in
+  let rec group_aux acc = function
+    | [] -> acc
+    | subsets :: t ->
+        let acc' =
+          subsets
+          |> List.map (fun subset ->
+                 acc
+                 |> List.filter (fun djs ->
+                        is_lst_disjoint_from_sets subset djs)
+                 |> List.map (fun djs -> subset :: djs))
+          |> List.flatten
+        in
+        group_aux acc' t
+  in
+  group_aux [ [] ] subset_groups
