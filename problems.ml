@@ -144,23 +144,27 @@ let rec range a b =
 
 let rand_select lst n =
   let len = length lst in
-  let rec get_random_indices max n acc =
+  let rec rand_idxs_with_replacement max n acc =
     if n = 0 then acc
-    else get_random_indices max (n - 1) (Random.int max :: acc)
+    else rand_idxs_with_replacement max (n - 1) (Random.int max :: acc)
   in
-  let random_indices =
-    get_random_indices len n [] |> List.sort compare
-  in
-  let rec extract_values indices idx = function
-    | [] -> []
-    | h :: t as lst -> begin
-        match indices with
-        | [] -> []
-        | i :: tl ->
-            if i = idx then h :: extract_values tl idx lst
-            else extract_values indices (idx + 1) t
-      end
-  in
-  extract_values random_indices 0 lst
+  let random_indices = rand_idxs_with_replacement len n [] in
+  List.map (List.nth lst) random_indices
 
 let lotto_select n m = rand_select (range 1 m) n
+
+module IntSet = Set.Make (Int)
+
+let permutation lst =
+  let len = length lst in
+  let rec permuatation_aux n idx_set acc =
+    if n = 0 then acc
+    else
+      let rand_idx = Random.int len in
+      if IntSet.mem rand_idx idx_set then permuatation_aux n idx_set acc
+      else
+        permuatation_aux (n - 1)
+          (IntSet.add rand_idx idx_set)
+          (List.nth lst rand_idx :: acc)
+  in
+  permuatation_aux len IntSet.empty []
