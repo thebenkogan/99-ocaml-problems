@@ -206,3 +206,33 @@ let group lst sizes =
         group_aux acc' t
   in
   group_aux [ [] ] subset_groups
+
+let length_sort lst =
+  List.sort (fun lst1 lst2 -> compare (length lst1) (length lst2)) lst
+
+module IntMap = Map.Make (Int)
+
+let frequency_sort lst =
+  let len = lst |> length |> float_of_int in
+  let count_map =
+    List.fold_left
+      (fun acc sublist ->
+        let sublist_len = length sublist in
+        match IntMap.find_opt sublist_len acc with
+        | None -> IntMap.add sublist_len 1. acc
+        | Some count -> IntMap.add sublist_len (count +. 1.) acc)
+      IntMap.empty lst
+  in
+  let freq_map = IntMap.map (fun count -> count /. len) count_map in
+  List.sort
+    (fun lst1 lst2 ->
+      compare
+        (IntMap.find (length lst1) freq_map)
+        (IntMap.find (length lst2) freq_map))
+    lst
+
+let is_prime n =
+  if n = 2 || n = 3 then true
+  else
+    n |> float_of_int |> sqrt |> int_of_float |> range 2
+    |> List.for_all (fun x -> n mod x <> 0)
