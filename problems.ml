@@ -236,3 +236,20 @@ let is_prime n =
   else
     n |> float_of_int |> sqrt |> int_of_float |> range 2
     |> List.for_all (fun x -> n mod x <> 0)
+
+let rec gcd x y =
+  if x = y then x else if x > y then gcd (x - y) y else gcd (y - x) x
+
+let coprime x y = gcd x y = 1
+
+let phi x =
+  if x = 1 then 1
+  else range 1 (x - 1) |> List.filter (coprime x) |> List.length
+
+let factors n =
+  let rec factors_aux d n =
+    if n = 1 then []
+    else if n mod d = 0 then d :: factors_aux d (n / d)
+    else factors_aux (d + 1) n
+  in
+  factors_aux 2 n
