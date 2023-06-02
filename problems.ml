@@ -279,3 +279,37 @@ let all_primes low high = range low high |> List.filter is_prime
 let goldbach n =
   range 3 n |> List.find (fun x -> is_prime x && is_prime (n - x))
   |> fun x -> (x, n - x)
+
+let goldbach_list low high =
+  range low high
+  |> List.filter_map (fun n ->
+         if n mod 2 = 0 then Some (n, goldbach n) else None)
+
+type bool_expr =
+  | Var of string
+  | Not of bool_expr
+  | And of bool_expr * bool_expr
+  | Or of bool_expr * bool_expr
+
+let rec eval_expr env = function
+  | Var a -> List.assoc a env
+  | Not b -> not (eval_expr env b)
+  | And (b1, b2) -> eval_expr env b1 && eval_expr env b2
+  | Or (b1, b2) -> eval_expr env b1 || eval_expr env b2
+
+let table2 v1 v2 expr =
+  [ (false, false); (false, true); (true, false); (true, true) ]
+  |> List.map (fun (x1, x2) ->
+         (x1, x2, eval_expr [ (v1, x1); (v2, x2) ] expr))
+
+let table vars expr =
+  let rec get_inputs acc = function
+    | [] -> List.map List.rev acc
+    | v :: t ->
+        get_inputs
+          (List.map (fun inputs -> (v, true) :: inputs) acc
+          @ List.map (fun inputs -> (v, false) :: inputs) acc)
+          t
+  in
+  vars |> get_inputs [ [] ]
+  |> List.map (fun env -> (env, eval_expr env expr))
