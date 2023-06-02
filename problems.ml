@@ -253,3 +253,29 @@ let factors n =
     else factors_aux (d + 1) n
   in
   factors_aux 2 n
+
+let factors_multiplicity n =
+  List.map
+    (function
+      | One x -> (x, 1)
+      | Many (count, x) -> (x, count))
+    (modified_encode (factors n))
+
+let phi_improved n =
+  n |> factors_multiplicity
+  |> List.fold_left
+       (fun acc (p, m) ->
+         acc * (p - 1)
+         * (float_of_int p ** float_of_int (m - 1) |> int_of_float))
+       1
+
+let timeit f x =
+  let t = Sys.time () in
+  let _ = f x in
+  Format.sprintf "%fs" (Sys.time () -. t)
+
+let all_primes low high = range low high |> List.filter is_prime
+
+let goldbach n =
+  range 3 n |> List.find (fun x -> is_prime x && is_prime (n - x))
+  |> fun x -> (x, n - x)
