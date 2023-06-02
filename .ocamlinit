@@ -1,7 +1,7 @@
 open Problems
-#use "src/lists.ml"
-#use "src/arithmetic.ml"
-#use "src/logic_and_codes.ml"
-#use "src/binary_trees.ml"
-#use "src/multiway_trees.ml"
-#use "src/miscellaneous.ml"
+open Lists
+open Arithmetic
+open Logic_and_codes
+open Binary_trees
+open Multiway_trees
+open Miscellaneous
