@@ -136,3 +136,35 @@ let rec remove_at n = function
 let rec insert_at v n = function
   | [] -> failwith "index out of bounds"
   | h :: t as l -> if n = 0 then v :: l else h :: insert_at v (n - 1) t
+
+let rec range a b =
+  if a = b then [ a ]
+  else if a < b then a :: range (a + 1) b
+  else a :: range (a - 1) b
+
+module IntSet = Set.Make (Int)
+
+(* Assumes n <= length of lst *)
+let rand_select lst n =
+  let len = length lst in
+  let rec get_random_indices max n set =
+    if n = 0 then IntSet.elements set
+    else
+      let rand_val = Random.int max in
+      if IntSet.mem rand_val set then get_random_indices max n set
+      else get_random_indices max (n - 1) (IntSet.add rand_val set)
+  in
+  let random_indices =
+    get_random_indices len n IntSet.empty |> List.sort compare
+  in
+  let rec extract_values indices idx = function
+    | [] -> []
+    | h :: t -> begin
+        match indices with
+        | [] -> []
+        | i :: tl ->
+            if i = idx then h :: extract_values tl (idx + 1) t
+            else extract_values indices (idx + 1) t
+      end
+  in
+  extract_values random_indices 0 lst
