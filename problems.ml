@@ -142,29 +142,25 @@ let rec range a b =
   else if a < b then a :: range (a + 1) b
   else a :: range (a - 1) b
 
-module IntSet = Set.Make (Int)
-
-(* Assumes n <= length of lst *)
 let rand_select lst n =
   let len = length lst in
-  let rec get_random_indices max n set =
-    if n = 0 then IntSet.elements set
-    else
-      let rand_val = Random.int max in
-      if IntSet.mem rand_val set then get_random_indices max n set
-      else get_random_indices max (n - 1) (IntSet.add rand_val set)
+  let rec get_random_indices max n acc =
+    if n = 0 then acc
+    else get_random_indices max (n - 1) (Random.int max :: acc)
   in
   let random_indices =
-    get_random_indices len n IntSet.empty |> List.sort compare
+    get_random_indices len n [] |> List.sort compare
   in
   let rec extract_values indices idx = function
     | [] -> []
-    | h :: t -> begin
+    | h :: t as lst -> begin
         match indices with
         | [] -> []
         | i :: tl ->
-            if i = idx then h :: extract_values tl (idx + 1) t
+            if i = idx then h :: extract_values tl idx lst
             else extract_values indices (idx + 1) t
       end
   in
   extract_values random_indices 0 lst
+
+let lotto_select n m = rand_select (range 1 m) n
